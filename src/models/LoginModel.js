@@ -16,6 +16,23 @@ class Login {
         this.user = null;
     }
 
+    async login() {
+        this.valida();
+        if(this.errors.length > 0) return;
+        this.user = await LoginModel.findOne({email: this.body.email});
+
+        if(!this.user) {
+            this.errors.push("Usuário inválido");
+            return;    
+        }
+
+        if(!bcrypt.compareSync(this.body.password, this.user.password)){
+            this.errors.push("Senha Inválida");
+            this.user = null;
+            return;
+        };
+}
+
     async register() {
         this.valida();
         if(this.errors.length > 0) return;
@@ -31,8 +48,8 @@ class Login {
     }
 
     async userExists(){
-        let users = await LoginModel.findOne({email: this.body.email});
-        if(users) this.errors.push("Usuario já existe");
+        this.user = await LoginModel.findOne({email: this.body.email});
+        if(this.user) this.errors.push("Usuario já existe");
     }
 
     valida() {
